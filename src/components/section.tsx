@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import Notification from './notification';
+import { EmptyNotifications } from './emptyNotifications';
 
 interface NotificationProps {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
@@ -26,9 +27,14 @@ const Section: React.FC<SectionProps> = ({ title, description, notifications }) 
         <Button variant="outline">Subscribe</Button>
       </div>
       <div className="mt-4 space-y-4">
-        {notifications.map((notification, index) => (
-          <Notification key={index} {...notification} />
-        ))}
+        {notifications.length === 0 ? (
+          <EmptyNotifications
+           />
+        ) : (
+          notifications.map((notification, index) => (
+            <Notification key={index} {...notification} />
+          ))
+        )}
       </div>
     </div>
   );

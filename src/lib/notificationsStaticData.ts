@@ -7,18 +7,18 @@ import TriangleAlertIcon from "@/components/icons/triangleAlertIcon";
 
 export const notifications = {
     status: [
-      {
-        icon: CheckIcon,
-        title: "Server Maintenance Completed",
-        description: "Our scheduled server maintenance has been completed. All systems are now back online.",
-        time: "2 hours ago",
-      },
-      {
-        icon: TriangleAlertIcon,
-        title: "Partial Outage Detected",
-        description: "We are currently experiencing a partial outage affecting some of our services. Our team is working to resolve the issue as soon as possible.",
-        time: "30 minutes ago",
-      },
+      // {
+      //   icon: CheckIcon,
+      //   title: "Server Maintenance Completed",
+      //   description: "Our scheduled server maintenance has been completed. All systems are now back online.",
+      //   time: "2 hours ago",
+      // },
+      // {
+      //   icon: TriangleAlertIcon,
+      //   title: "Partial Outage Detected",
+      //   description: "We are currently experiencing a partial outage affecting some of our services. Our team is working to resolve the issue as soon as possible.",
+      //   time: "30 minutes ago",
+      // },
     ],
     security: [
       {
