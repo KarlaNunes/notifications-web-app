@@ -1,10 +1,6 @@
+"use client";
 import React from 'react';
-import CheckIcon from './icons/checkIcon';
-import CircleAlertIcon from './icons/circleAlertIcon';
-import CreditCardIcon from './icons/creditCardIcon';
-import DollarSignIcon from './icons/dollarSignIcon';
-import ShieldIcon from './icons/shieldIcon';
-import TriangleAlertIcon from './icons/triangleAlertIcon';
+
 
 interface NotificationProps {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;

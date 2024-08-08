@@ -4,6 +4,8 @@ import { sections } from "@/lib/sectionsStaticData"
 
 
 export default function Home() {
+  const token = '3e1978056c485cf7219e0dfaf3e4cbfd5667ce1d';
+
   return (
     <div className="w-full max-w-4xl mx-auto py-12 md:py-16 lg:py-20">
       <div className="px-4 md:px-6">
@@ -16,6 +18,7 @@ export default function Home() {
         <div className="mt-12 space-y-8">
           {sections.map((section, index) => (
             <Section
+              token={token}
               key={index}
               title={section.title}
               description={section.description}
