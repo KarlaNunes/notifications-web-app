@@ -18,7 +18,6 @@ export default function Home() {
         <div className="mt-12 space-y-8">
           {sections.map((section, index) => (
             <Section
-              token={token}
               key={index}
               title={section.title}
               description={section.description}

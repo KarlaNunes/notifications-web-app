@@ -1,7 +1,12 @@
-import { io, Socket } from "socket.io-client";
+// src/socket.ts
+const BASE_URL = "ws://localhost:8000";
+const getToken = (): string | null => {
+  return '3e1978056c485cf7219e0dfaf3e4cbfd5667ce1d'; 
+};
 
-const SOCKET_URL = "ws://localhost:8000'";
+const token = getToken();
+const SOCKET_URL = `${BASE_URL}/ws/notifications/?token=${token}`;
 
-const socket: Socket = io(SOCKET_URL);
+const socket = new WebSocket(SOCKET_URL);
 
 export default socket;

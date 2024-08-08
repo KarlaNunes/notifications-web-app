@@ -6,7 +6,6 @@ import Notification from './notification';
 import { EmptyNotifications } from './emptyNotifications';
 import socket from '@/socket';
 
-
 interface NotificationProps {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   title: string;
@@ -18,42 +17,66 @@ interface SectionProps {
   title: string;
   description: string;
   notifications: NotificationProps[];
-  token: string;
 }
 
-const Section: React.FC<SectionProps> = ({ title, description, notifications, token }) => {
+const Section: React.FC<SectionProps> = ({ title, description, notifications }) => {
+  const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
+  const [ws, setWs] = useState<WebSocket | null>(null);
+  // const [messages, setMessages] = useState<NotificationProps[]>(notifications);
 
   useEffect(() => {
-    socket.auth = { token };
-    socket.connect();
+    if (ws === null) {
+      const token = '3e1978056c485cf7219e0dfaf3e4cbfd5667ce1d'; // Substitua com o token real
+      const socket = new WebSocket(`ws://localhost:8000/ws/notifications/?token=${token}`);
+      
+      socket.onopen = () => {
+        console.log("Connected to WebSocket");
+      };
 
-    socket.on('connect', () => {
-      console.log('Conectado ao WebSocket');
-    });
+      socket.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        console.log("SURTO: ", data);
+        // setMessages(prevMessages => [...prevMessages, data]);
+      };
 
-    socket.on('message', (data: string) => {
-      const parsedData = JSON.parse(data);
-      console.log('Mensagem recebida:', parsedData);
-    });
+      socket.onerror = (error) => {
+        console.error("WebSocket error:", error);
+      };
 
-    socket.on('disconnect', () => {
-      console.log('Desconectado do WebSocket');
-    });
+      socket.onclose = () => {
+        console.log("WebSocket connection closed");
+      };
+
+      setWs(socket);
+    }
 
     return () => {
-      socket.off('connect');
-      socket.off('message');
-      socket.off('disconnect');
-      socket.disconnect();
+      if (ws) {
+        ws.close();
+      }
     };
-  }, [token]);
+  }, [ws]);
 
   const handleSubscribe = (topic: string) => {
     const message = {
       type: 'subscribe',
       topic: topic,
     };
-    socket.emit('message', JSON.stringify(message));
+    setIsSubscribed(true);
+    if (ws) {
+      ws.send(JSON.stringify(message));
+    }
+  };
+
+  const handleUnsubscribe = (topic: string) => {
+    const message = {
+      type: 'unsubscribe',
+      topic: topic,
+    };
+    setIsSubscribed(false);
+    if (ws) {
+      ws.send(JSON.stringify(message));
+    }
   };
 
   return (
@@ -63,16 +86,18 @@ const Section: React.FC<SectionProps> = ({ title, description, notifications, to
           <h2 className="text-xl font-bold">{title}</h2>
           <p className="text-muted-foreground">{description}</p>
         </div>
-        <Button variant="outline" onClick={() => handleSubscribe('Security')}>Subscribe</Button>
+        <Button variant="outline" onClick={() => isSubscribed ? handleUnsubscribe('Security') : handleSubscribe('Security')}>
+          {isSubscribed ? 'Subscribed' : 'Unsubscribed'}
+        </Button>
       </div>
       <div className="mt-4 space-y-4">
         {notifications.length === 0 ? (
-          <EmptyNotifications />
-        ) : (
-          notifications.map((notification, index) => (
-            <Notification key={index} {...notification} />
-          ))
-        )}
+            <EmptyNotifications />
+          ) : (
+            notifications.map((notification, index) => (
+              <Notification key={index} {...notification} />
+            ))
+          )}
       </div>
     </div>
   );
