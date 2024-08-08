@@ -4,29 +4,45 @@ import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Notification from './notification';
 import { EmptyNotifications } from './emptyNotifications';
-import socket from '@/socket';
+import { fetchSubscriptions } from '@/services/subscriptionsService';
 
 interface NotificationProps {
-  icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   title: string;
-  description: string;
-  time: string;
+  message: string;
+  created_at: string;
+}
+
+interface Subscription {
+  id: number;
+  topic_name: string;
 }
 
 interface SectionProps {
+  id: number;
   title: string;
-  description: string;
-  notifications: NotificationProps[];
 }
 
-const Section: React.FC<SectionProps> = ({ title, description, notifications }) => {
+const Section: React.FC<SectionProps> = ({ id, title }) => {
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const [ws, setWs] = useState<WebSocket | null>(null);
-  // const [messages, setMessages] = useState<NotificationProps[]>(notifications);
+  const [notification, setNotification] = useState<NotificationProps | null>(null);
 
   useEffect(() => {
+    const token = 'acaee9191ae3ec2545b3a28d6288f4a4ab754d8e';
+
+    const checkSubscription = async () => {
+      try {
+        const subscriptions: Subscription[] = await fetchSubscriptions(token);
+        const subscribed = subscriptions.some(subscription => subscription.topic_name === title);
+        setIsSubscribed(subscribed);
+      } catch (error) {
+        console.error('Error fetching subscriptions:', error);
+      }
+    };
+
+    checkSubscription();
+
     if (ws === null) {
-      const token = '3e1978056c485cf7219e0dfaf3e4cbfd5667ce1d'; // Substitua com o token real
       const socket = new WebSocket(`ws://localhost:8000/ws/notifications/?token=${token}`);
       
       socket.onopen = () => {
@@ -35,8 +51,7 @@ const Section: React.FC<SectionProps> = ({ title, description, notifications }) 
 
       socket.onmessage = (event) => {
         const data = JSON.parse(event.data);
-        console.log("SURTO: ", data);
-        // setMessages(prevMessages => [...prevMessages, data]);
+        setNotification(data);
       };
 
       socket.onerror = (error) => {
@@ -55,7 +70,7 @@ const Section: React.FC<SectionProps> = ({ title, description, notifications }) 
         ws.close();
       }
     };
-  }, [ws]);
+  }, [ws, id, title]);
 
   const handleSubscribe = (topic: string) => {
     const message = {
@@ -84,20 +99,17 @@ const Section: React.FC<SectionProps> = ({ title, description, notifications }) 
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-xl font-bold">{title}</h2>
-          <p className="text-muted-foreground">{description}</p>
         </div>
-        <Button variant="outline" onClick={() => isSubscribed ? handleUnsubscribe('Security') : handleSubscribe('Security')}>
-          {isSubscribed ? 'Subscribed' : 'Unsubscribed'}
+        <Button variant="outline" onClick={() => isSubscribed ? handleUnsubscribe(title) : handleSubscribe(title)}>
+          {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
         </Button>
       </div>
       <div className="mt-4 space-y-4">
-        {notifications.length === 0 ? (
-            <EmptyNotifications />
-          ) : (
-            notifications.map((notification, index) => (
-              <Notification key={index} {...notification} />
-            ))
-          )}
+        {isSubscribed && notification ? (
+          <Notification isSubscribed={isSubscribed} {...notification} />
+        ) : (
+          <EmptyNotifications />
+        )}
       </div>
     </div>
   );

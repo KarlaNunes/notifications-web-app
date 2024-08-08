@@ -1,10 +1,28 @@
+"use client"
+import React, { useEffect, useState } from "react";
+import Section from "@/components/section";
+import { fetchTopics } from "@/services/topicService";
 
-import Section from "@/components/section"
-import { sections } from "@/lib/sectionsStaticData"
-
+interface Topic {
+  id: number;
+  name: string;
+}
 
 export default function Home() {
-  const token = '3e1978056c485cf7219e0dfaf3e4cbfd5667ce1d';
+  const [topics, setTopics] = useState<Topic[]>([]);
+
+  useEffect(() => {
+    const getTopics = async () => {
+      try {
+        const data = await fetchTopics();
+        setTopics(data);
+      } catch (err) {
+        console.error(err);
+      } 
+    };
+
+    getTopics();
+  }, []);
 
   return (
     <div className="w-full max-w-4xl mx-auto py-12 md:py-16 lg:py-20">
@@ -16,16 +34,15 @@ export default function Home() {
           </p>
         </div>
         <div className="mt-12 space-y-8">
-          {sections.map((section, index) => (
+          {topics.map((topic) => (
             <Section
-              key={index}
-              title={section.title}
-              description={section.description}
-              notifications={section.notifications}
+              key={topic.id}
+              id={topic.id}
+              title={topic.name}
             />
           ))}
         </div>
       </div>
     </div>
-  )
+  );
 }
